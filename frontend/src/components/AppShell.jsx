@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Activity, CalendarDays, ClipboardCheck, Dumbbell, LogOut, Menu, Shield, ShieldCheck, Users, X } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
+import { SoccerBallLogo } from './SoccerBallLogo'
 
 const navigation = [
   { label: 'Dashboard', path: '/dashboard', icon: Activity },
@@ -35,7 +36,7 @@ export function AppShell() {
       {menuOpen && <button className="mobile-scrim" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
       <aside className={`sidebar ${menuOpen ? 'is-open' : ''}`}>
         <div className="brand-lockup">
-          <div className="brand-mark"><Activity size={21} strokeWidth={2.8} /></div>
+          <div className="brand-mark"><SoccerBallLogo /></div>
           <div><span className="brand-name">KICKOFF</span><span className="brand-caption">Training operations</span></div>
         </div>
         <div className="nav-label">Workspace</div>

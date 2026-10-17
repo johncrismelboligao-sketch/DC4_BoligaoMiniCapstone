@@ -1,17 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  color: #e5f0e1;
-  background: #062309;
+  color: #e7efe7;
+  background: #0a120e;
   color-scheme: dark;
-  --forest: #10270a;
-  --leaf: #55a34e;
-  --lime: #a9d77d;
-  --paper: #062309;
-  --ink: #e5f0e1;
-  --muted: #a8bba3;
-  --line: #29452a;
-  --clay: #a9d77d;
+  --forest: #193c2d;
+  --leaf: #72a77b;
+  --lime: #b7dc62;
+  --paper: #0b1510;
+  --ink: #e7efe7;
+  --muted: #9aaba0;
+  --line: #263b30;
+  --clay: #d1b65e;
   --display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
   font-family: 'DM Sans', sans-serif;
   font-synthesis: none;
@@ -30,7 +30,8 @@ a { color: inherit; }
 .app-frame { min-height: 100vh; display: grid; grid-template-columns: 252px minmax(0, 1fr); background: var(--paper); }
 .sidebar { background: var(--forest); color: #f5f6eb; display: flex; flex-direction: column; padding: 25px 18px 18px; min-height: 100vh; position: sticky; top: 0; height: 100vh; z-index: 20; }
 .brand-lockup { display: flex; align-items: center; gap: 12px; padding: 4px 8px 29px; }
-.brand-mark { width: 38px; height: 38px; background: var(--lime); color: var(--forest); display: grid; place-items: center; border-radius: 11px 11px 11px 3px; }
+.brand-mark { width: 38px; height: 38px; background: transparent; color: var(--forest); display: grid; place-items: center; border-radius: 50%; overflow: hidden; }
+.soccer-ball-logo { display: block; width: 100%; height: 100%; }
 .brand-name { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1; }
 .brand-caption { display: block; color: #a9b7aa; font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; margin-top: 5px; }
 .nav-label { color: #8fa296; text-transform: uppercase; font-size: 10px; letter-spacing: 1.6px; padding: 0 12px 10px; margin-top: 9px; }
@@ -530,58 +531,3 @@ a { color: inherit; }
 
 ::selection { color: #0b1510; background: #b7dc62; }
 
-/* Green palette from the supplied reference image. */
-:root {
-  --palette-950: #062309;
-  --palette-900: #10270a;
-  --palette-800: #123315;
-  --palette-700: #20441b;
-  --palette-600: #1c6325;
-  --palette-text: #e5f0e1;
-  --palette-muted: #a8bba3;
-  --palette-border: #29452a;
-  --palette-highlight: #a9d77d;
-}
-body, .app-frame, .workspace, .auth-screen, .auth-main { background: var(--palette-950); color: var(--palette-text); }
-.sidebar, .auth-aside { background: var(--palette-900); }
-.topbar { background: rgba(16, 39, 10, .96); border-color: var(--palette-border); }
-.brand-mark, .primary-button { background: var(--palette-600); color: #f3f8ef; }
-.brand-mark { color: #f3f8ef; }
-.primary-button:hover { background: #287332; }
-.nav-link:hover, .nav-link.active { background: var(--palette-700); color: #fff; }
-.role-chip, .avatar { background: var(--palette-800); color: var(--palette-highlight); }
-.surface-panel, .stat-card, .session-row, .registration-toolbar, .registration-row,
-.club-table-wrap, .filter-bar, .date-stamp, .session-modal { background: var(--palette-900); border-color: var(--palette-border); }
-.session-row:hover { border-color: var(--palette-600); }
-.detail-facts, .drill-plan li, .member-summary, .toggle-row,
-.search-field, .filter-bar select, .filter-date, .field input, .field select,
-.field textarea, .select-control, .attendance-button { background: var(--palette-800); border-color: var(--palette-border); color: var(--palette-text); }
-.club-table th { background: var(--palette-800); border-color: var(--palette-border); color: #d0e3c9; }
-.club-table td { border-color: var(--palette-border); color: var(--palette-muted); }
-.club-table td strong, .session-row-title strong, .upcoming-main strong,
-.registration-person strong, .registration-session strong, .detail-facts strong,
-.drill-plan strong, .empty-state strong, .toggle-row strong, .member-summary strong { color: var(--palette-text); }
-.club-table tbody tr:hover, .drill-option:hover, .secondary-button:hover,
-.filter-tab:hover, .club-tab:hover { background: var(--palette-700); }
-.category-token, .role-token, .drill-order { color: #d7ebce; background: var(--palette-700); }
-.role-admin, .role-coach { color: #d7ebce; background: var(--palette-800); }
-.filter-tab.active, .club-tab.active, .attendance-button.selected { color: var(--palette-highlight); background: var(--palette-700); }
-.date-block, .session-date-tile { background: var(--palette-800); color: var(--palette-highlight); }
-.stat-moss, .stat-amber, .stat-blue, .stat-clay { background: var(--palette-800); color: #d7ebce; }
-.status-ongoing, .status-approved, .status-scheduled, .status-pending { background: var(--palette-700); color: #d7ebce; }
-.detail-facts small, .session-row-copy > span, .upcoming-meta, .registration-person > div > span,
-.registration-session > span, .page-subtitle, .auth-panel > p, .field label,
-.profile-name, .breadcrumb { color: var(--palette-muted); }
-.secondary-button, .attendance-button { background: var(--palette-800); color: var(--palette-text); border-color: var(--palette-border); }
-.secondary-button:hover { background: var(--palette-700); }
-.primary-button, .primary-button:hover { color: #f3f8ef; }
-.success-banner, .action-approve { color: #d7ebce; background: var(--palette-800); border-color: var(--palette-700); }
-.active-token.is-active { color: #b9e0a8; }
-.club-tabs, .modal-heading { border-color: var(--palette-border); }
-.drill-picker { background: var(--palette-900); border-color: var(--palette-border); }
-.drill-option > span { color: var(--palette-text); }
-.drill-option small, .scope-note, .list-summary, .stat-note { color: var(--palette-muted); }
-.field input:focus, .field select:focus, .field textarea:focus, .select-control:focus { border-color: var(--palette-600); box-shadow: 0 0 0 3px rgba(28, 99, 37, .3); }
-.auth-switch a, .eyebrow, .empty-kicker, .dashboard-footer a { color: var(--palette-highlight); }
-.loading-mark { border-color: var(--palette-border); border-top-color: var(--palette-600); }
-::selection { color: #fff; background: var(--palette-600); }

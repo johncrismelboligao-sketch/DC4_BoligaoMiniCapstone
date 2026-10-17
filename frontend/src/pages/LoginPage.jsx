@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Activity, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
+import { SoccerBallLogo } from '../components/SoccerBallLogo'
 
 export function LoginPage() {
   const { login } = useAuth()
@@ -28,7 +29,7 @@ export function LoginPage() {
   return (
     <div className="auth-screen">
       <aside className="auth-aside">
-        <div className="brand-lockup"><div className="brand-mark"><Activity size={21} strokeWidth={2.8} /></div><div><span className="brand-name">KICKOFF</span><span className="brand-caption">Training operations</span></div></div>
+        <div className="brand-lockup"><div className="brand-mark"><SoccerBallLogo /></div><div><span className="brand-name">KICKOFF</span><span className="brand-caption">Training operations</span></div></div>
         <div className="auth-pitch"><div className="eyebrow">The next session starts here</div><h2>Better days<br />start <span>on the pitch.</span></h2><p>One home for training plans, player registrations and every small step that builds a stronger team.</p></div>
         <div className="auth-meta">MANILA · COMMUNITY FOOTBALL</div>
       </aside>
