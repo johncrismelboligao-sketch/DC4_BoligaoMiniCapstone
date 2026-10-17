@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { SoccerBallLogo } from '../components/SoccerBallLogo'
@@ -8,9 +8,10 @@ export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [form, setForm] = useState({ email: '', password: '' })
+  const [form, setForm] = useState({ email: 'admin@gmail.com', password: 'password' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -27,23 +28,36 @@ export function LoginPage() {
   }
 
   return (
-    <div className="auth-screen">
-      <aside className="auth-aside">
-        <div className="brand-lockup"><div className="brand-mark"><SoccerBallLogo /></div><div><span className="brand-name">KICKOFF</span><span className="brand-caption">Training operations</span></div></div>
-        <div className="auth-pitch"><div className="eyebrow">The next session starts here</div><h2>Better days<br />start <span>on the pitch.</span></h2><p>One home for training plans, player registrations and every small step that builds a stronger team.</p></div>
-        <div className="auth-meta">MANILA Â· COMMUNITY FOOTBALL</div>
-      </aside>
-      <main className="auth-main"><section className="auth-panel">
-        <div className="eyebrow">Welcome back</div><h1>Sign in to KickOff</h1><p>Pick up where your team left off.</p>
-        <form className="auth-form" onSubmit={handleSubmit}>
-          {error && <div className="form-error" role="alert">{error}</div>}
-          <div className="field"><label htmlFor="email">Email address</label><input id="email" type="email" autoComplete="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="Enter your email address" /></div>
-          <div className="field"><label htmlFor="password">Password</label><input id="password" type="password" autoComplete="current-password" required value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Enter your password" /></div>
-          <button className="primary-button auth-submit" disabled={busy}>{busy ? 'Signing in...' : 'Sign in'}<ArrowRight size={16} /></button>
-        </form>
-        <div className="auth-switch">New to the club? <Link to="/register">Create a player account</Link></div>
-          <div className="demo-note"><strong>Demo access</strong><br />Admin: admin@gmail.com<br />Password: password</div>
-      </section></main>
-    </div>
+    <main className="login-screen">
+      <div className="pitch-lines" aria-hidden="true">
+        <span className="pitch-box pitch-box-left" />
+        <span className="pitch-box pitch-box-right" />
+        <span className="pitch-spot pitch-spot-left" />
+        <span className="pitch-spot pitch-spot-right" />
+      </div>
+      <section className="login-content">
+        <div className="login-brand"><div className="brand-mark"><SoccerBallLogo /></div><div><span className="brand-name">KICKOFF</span><span className="brand-caption">Training operations</span></div></div>
+        <h1 className="login-headline"><span className="headline-line">Better days</span><span className="headline-line">start</span><span className="headline-ribbon">On the pitch.</span></h1>
+        <div className="login-stats" aria-label="Club statistics">
+          <div><strong>24</strong><span>Sessions</span></div>
+          <div><strong>180</strong><span>Players</span></div>
+          <div><strong>12</strong><span>Teams</span></div>
+        </div>
+        <div className="login-card">
+          <nav className="login-tabs" aria-label="Account access">
+            <span className="login-tab is-active" aria-current="page">Sign in</span>
+            <Link className="login-tab" to="/register">Create account</Link>
+          </nav>
+          <form className="auth-form" onSubmit={handleSubmit}>
+            {error && <div className="form-error" role="alert">{error}</div>}
+            <div className="field"><label htmlFor="email">Email address</label><input id="email" type="email" autoComplete="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="Enter your email address" /></div>
+            <div className="field"><label htmlFor="password">Password</label><div className="password-control"><input id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" required value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Enter your password" /><button className="password-visibility" type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword((value) => !value)}>{showPassword ? <Eye size={17} /> : <EyeOff size={17} />}</button></div></div>
+            <button className="primary-button auth-submit" disabled={busy}>{busy ? 'Signing in...' : 'Sign in'}</button>
+          </form>
+          <div className="login-demo"><span>Demo: admin@gmail.com / password</span><button className="demo-fill" type="button" onClick={() => setForm({ email: 'admin@gmail.com', password: 'password' })}>Fill details</button></div>
+        </div>
+        <div className="login-meta">Manila · Community football</div>
+      </section>
+    </main>
   )
 }

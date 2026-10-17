@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { ArrowRight } from 'lucide-react'
+﻿import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { SoccerBallLogo } from '../components/SoccerBallLogo'
@@ -33,25 +32,39 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="auth-screen">
-      <aside className="auth-aside">
-        <div className="brand-lockup"><div className="brand-mark"><SoccerBallLogo /></div><div><span className="brand-name">KICKOFF</span><span className="brand-caption">Training operations</span></div></div>
-        <div className="auth-pitch"><div className="eyebrow">A place to grow</div><h2>Show up.<br /><span>Get better.</span></h2><p>Join your age group, keep track of upcoming sessions, and build your game one practice at a time.</p></div>
-        <div className="auth-meta">MANILA · COMMUNITY FOOTBALL</div>
-      </aside>
-      <main className="auth-main"><section className="auth-panel">
-        <div className="eyebrow">Player registration</div><h1>Create your account</h1><p>Your coach or club admin can assign your age group after signup.</p>
-        <form className="auth-form" onSubmit={handleSubmit} noValidate>
-          {errors.form && <div className="form-error" role="alert">{errors.form}</div>}
-          <FormField label="Full name" name="name" value={form.name} error={errors.name?.[0] || errors.name} onChange={(value) => setForm({ ...form, name: value })} autoComplete="name" />
-          <FormField label="Email address" name="email" type="email" value={form.email} error={errors.email?.[0] || errors.email} onChange={(value) => setForm({ ...form, email: value })} autoComplete="email" />
-          <FormField label="Password" name="password" type="password" value={form.password} error={errors.password?.[0] || errors.password} onChange={(value) => setForm({ ...form, password: value })} autoComplete="new-password" />
-          <FormField label="Confirm password" name="password_confirmation" type="password" value={form.password_confirmation} error={errors.password_confirmation?.[0] || errors.password_confirmation} onChange={(value) => setForm({ ...form, password_confirmation: value })} autoComplete="new-password" />
-          <button className="primary-button auth-submit" disabled={busy}>{busy ? 'Creating account...' : 'Create player account'}<ArrowRight size={16} /></button>
-        </form>
-        <div className="auth-switch">Already registered? <Link to="/login">Sign in</Link></div>
-      </section></main>
-    </div>
+    <main className="login-screen register-screen">
+      <div className="pitch-lines" aria-hidden="true">
+        <span className="pitch-box pitch-box-left" />
+        <span className="pitch-box pitch-box-right" />
+        <span className="pitch-spot pitch-spot-left" />
+        <span className="pitch-spot pitch-spot-right" />
+      </div>
+      <section className="login-content">
+        <div className="login-brand"><div className="brand-mark"><SoccerBallLogo /></div><div><span className="brand-name">KICKOFF</span><span className="brand-caption">Training operations</span></div></div>
+        <h1 className="login-headline"><span className="headline-line">Better days</span><span className="headline-line">start</span><span className="headline-ribbon">On the pitch.</span></h1>
+        <div className="login-stats" aria-label="Club statistics">
+          <div><strong>24</strong><span>Sessions</span></div>
+          <div><strong>180</strong><span>Players</span></div>
+          <div><strong>12</strong><span>Teams</span></div>
+        </div>
+        <div className="login-card">
+          <nav className="login-tabs" aria-label="Account access">
+            <Link className="login-tab" to="/login">Sign in</Link>
+            <span className="login-tab is-active" aria-current="page">Create account</span>
+          </nav>
+          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+            {errors.form && <div className="form-error" role="alert">{errors.form}</div>}
+            <FormField label="Full name" name="name" value={form.name} error={errors.name?.[0] || errors.name} onChange={(value) => setForm({ ...form, name: value })} autoComplete="name" />
+            <FormField label="Email address" name="email" type="email" value={form.email} error={errors.email?.[0] || errors.email} onChange={(value) => setForm({ ...form, email: value })} autoComplete="email" />
+            <FormField label="Password" name="password" type="password" value={form.password} error={errors.password?.[0] || errors.password} onChange={(value) => setForm({ ...form, password: value })} autoComplete="new-password" />
+            <FormField label="Confirm password" name="password_confirmation" type="password" value={form.password_confirmation} error={errors.password_confirmation?.[0] || errors.password_confirmation} onChange={(value) => setForm({ ...form, password_confirmation: value })} autoComplete="new-password" />
+            <button className="primary-button auth-submit" disabled={busy}>{busy ? 'Creating account...' : 'Create account'}</button>
+          </form>
+          <div className="login-demo register-prompt"><span>Already have an account?</span><Link className="demo-fill" to="/login">Sign in</Link></div>
+        </div>
+        <div className="login-meta">Manila · Community football</div>
+      </section>
+    </main>
   )
 }
 
