@@ -48,7 +48,7 @@ All seeded accounts use the password `password`.
 - Player: `player@gmail.com`
 - Coaches: `miguel.coach@gmail.com`, `liza.coach@gmail.com`
 
-The seed database includes four age-group teams, three venues, 24 players, 15 drills, 25 training sessions, and 100 registrations.
+The seed database includes four age-group teams, three venues, one demo player, 15 drills, 25 training sessions, and registrations for that player.
 
 ## API Overview
 

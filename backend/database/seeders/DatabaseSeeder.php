@@ -44,25 +44,13 @@ class DatabaseSeeder extends Seeder
             User::factory()->create(['name' => 'Liza Bautista', 'email' => 'liza.coach@gmail.com', 'password' => 'password', 'role' => 'coach', 'team_id' => $teams[2]->id]),
         ]);
 
-        $playerNames = [
-            'Klint Joseph Taylaran', 'Sofia Garcia', 'Enzo Villanueva', 'Isabella Mendoza',
-            'Lorenzo Aquino', 'Mikaela Ramos', 'Rafael Castillo', 'Andrea Flores',
-            'Nico Navarro', 'Camille Torres', 'Joaquin Reyes', 'Beatriz Cruz',
-            'Gabriel Lim', 'Althea Fernandez', 'Marco Bautista', 'Chloe Rivera',
-            'Paolo Santiago', 'Danica Morales', 'Andres Valdez', 'Bianca Salazar',
-            'Luis Mercado', 'Katrina Tan', 'Noah Dominguez', 'Elise Manalo',
-        ];
-        $players = collect();
-
-        foreach ($playerNames as $index => $name) {
-            $players->push(User::factory()->create([
-                'name' => $name,
-                'email' => $index === 0 ? 'player@gmail.com' : 'player'.($index + 1).'@gmail.com',
-                'password' => 'password',
-                'role' => 'player',
-                'team_id' => $teams[$index % 4]->id,
-            ]));
-        }
+        $players = collect([User::factory()->create([
+            'name' => 'Klint Joseph Taylaran',
+            'email' => 'player@gmail.com',
+            'password' => 'password',
+            'role' => 'player',
+            'team_id' => $teams[0]->id,
+        ])]);
 
         $drillData = [
             ['name' => 'Triangle Passing', 'category' => 'passing'],
@@ -122,7 +110,7 @@ class DatabaseSeeder extends Seeder
             }
 
             $teamPlayers = $players->where('team_id', $team->id)->values();
-            foreach ($teamPlayers->take(4) as $playerIndex => $player) {
+            foreach ($teamPlayers as $playerIndex => $player) {
                 $registrationStatus = ['pending', 'approved', 'rejected', 'approved', 'cancelled'][($index + $playerIndex) % 5];
                 Registration::factory()->create([
                     'user_id' => $player->id,

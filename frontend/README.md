@@ -14,8 +14,6 @@ Open `http://localhost:5173`. Start the Laravel API separately at `http://127.0.
 
 Demo admin: `admin@gmail.com` / `password`
 
-Demo player: `player@gmail.com` / `password`
-
 ## Checks
 
 ```powershell
