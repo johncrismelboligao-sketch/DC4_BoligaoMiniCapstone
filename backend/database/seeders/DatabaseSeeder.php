@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
         ])->map(fn (array $venue) => Venue::factory()->create($venue));
 
         $admin = User::factory()->create([
-            'name' => 'Gabriela Reyes',
+            'name' => 'John Crismel J. Boligao',
             'email' => 'admin@kickoff.test',
             'password' => 'password',
             'role' => 'admin',
