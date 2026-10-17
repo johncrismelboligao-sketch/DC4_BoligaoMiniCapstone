@@ -41,7 +41,7 @@ export function LoginPage() {
           <button className="primary-button auth-submit" disabled={busy}>{busy ? 'Signing in...' : 'Sign in'}<ArrowRight size={16} /></button>
         </form>
         <div className="auth-switch">New to the club? <Link to="/register">Create a player account</Link></div>
-        <div className="demo-note"><strong>Demo access</strong><br />Admin: admin@kickoff.test · Player: player@kickoff.test<br />Password: password</div>
+        <div className="demo-note"><strong>Demo access</strong><br />Admin: admin@gmail.com · Player: player@gmail.com<br />Password: password</div>
       </section></main>
     </div>
   )

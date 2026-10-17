@@ -12,9 +12,9 @@ npm run dev
 
 Open `http://localhost:5173`. Start the Laravel API separately at `http://127.0.0.1:8000` and seed its database before signing in. Configure `VITE_API_BASE_URL` in `.env` if the API uses a different address.
 
-Demo admin: `admin@kickoff.test` / `password`
+Demo admin: `admin@gmail.com` / `password`
 
-Demo player: `player@kickoff.test` / `password`
+Demo player: `player@gmail.com` / `password`
 
 ## Checks
 

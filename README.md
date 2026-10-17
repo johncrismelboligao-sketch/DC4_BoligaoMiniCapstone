@@ -44,9 +44,9 @@ Protected API requests use the Sanctum bearer token managed by the frontend. To 
 
 All seeded accounts use the password `password`.
 
-- Admin: `admin@kickoff.test`
-- Player: `player@kickoff.test`
-- Coaches: `miguel.coach@kickoff.test`, `liza.coach@kickoff.test`
+- Admin: `admin@gmail.com`
+- Player: `player@gmail.com`
+- Coaches: `miguel.coach@gmail.com`, `liza.coach@gmail.com`
 
 The seed database includes four age-group teams, three venues, 24 players, 15 drills, 25 training sessions, and 100 registrations.
 

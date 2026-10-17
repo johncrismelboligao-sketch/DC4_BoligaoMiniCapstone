@@ -33,15 +33,15 @@ class DatabaseSeeder extends Seeder
 
         $admin = User::factory()->create([
             'name' => 'John Crismel J. Boligao',
-            'email' => 'admin@kickoff.test',
+            'email' => 'admin@gmail.com',
             'password' => 'password',
             'role' => 'admin',
             'team_id' => null,
         ]);
 
         $coaches = collect([
-            User::factory()->create(['name' => 'Miguel Santos', 'email' => 'miguel.coach@kickoff.test', 'password' => 'password', 'role' => 'coach', 'team_id' => $teams[0]->id]),
-            User::factory()->create(['name' => 'Liza Bautista', 'email' => 'liza.coach@kickoff.test', 'password' => 'password', 'role' => 'coach', 'team_id' => $teams[2]->id]),
+            User::factory()->create(['name' => 'Miguel Santos', 'email' => 'miguel.coach@gmail.com', 'password' => 'password', 'role' => 'coach', 'team_id' => $teams[0]->id]),
+            User::factory()->create(['name' => 'Liza Bautista', 'email' => 'liza.coach@gmail.com', 'password' => 'password', 'role' => 'coach', 'team_id' => $teams[2]->id]),
         ]);
 
         $playerNames = [
@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
         foreach ($playerNames as $index => $name) {
             $players->push(User::factory()->create([
                 'name' => $name,
-                'email' => $index === 0 ? 'player@kickoff.test' : 'player'.($index + 1).'@kickoff.test',
+                'email' => $index === 0 ? 'player@gmail.com' : 'player'.($index + 1).'@gmail.com',
                 'password' => 'password',
                 'role' => 'player',
                 'team_id' => $teams[$index % 4]->id,

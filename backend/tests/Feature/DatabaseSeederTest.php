@@ -15,8 +15,8 @@ class DatabaseSeederTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $this->assertDatabaseHas('users', ['email' => 'admin@kickoff.test', 'role' => 'admin']);
-        $this->assertDatabaseHas('users', ['email' => 'player@kickoff.test', 'role' => 'player']);
+        $this->assertDatabaseHas('users', ['email' => 'admin@gmail.com', 'role' => 'admin']);
+        $this->assertDatabaseHas('users', ['email' => 'player@gmail.com', 'role' => 'player']);
         $this->assertSame(2, User::where('role', 'coach')->count());
         $this->assertSame(24, User::where('role', 'player')->count());
         $this->assertDatabaseCount('teams', 4);
