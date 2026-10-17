@@ -1,16 +1,24 @@
-# React + Vite
+# KickOff Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The KickOff React SPA connects to the Laravel API in `../backend` for authentication, football sessions, registrations, and club administration.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```powershell
+npm install
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+npm run dev
+```
 
-## React Compiler
+Open `http://localhost:5173`. Start the Laravel API separately at `http://127.0.0.1:8000` and seed its database before signing in. Configure `VITE_API_BASE_URL` in `.env` if the API uses a different address.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Demo admin: `admin@kickoff.test` / `password`
 
-## Expanding the Oxlint configuration
+Demo player: `player@kickoff.test` / `password`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Checks
+
+```powershell
+npm run lint
+npm run build
+```

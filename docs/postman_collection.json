@@ -1,0 +1,120 @@
+{
+  "info": {
+    "_postman_id": "a80b5aac-5684-485f-9c10-7ce816db01f5",
+    "name": "KickOff Football Training API",
+    "description": "Laravel API for teams, training sessions, drills, and player registrations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "token", "value": "" },
+    { "key": "sessionId", "value": "1" },
+    { "key": "registrationId", "value": "1" },
+    { "key": "drillId", "value": "1" },
+    { "key": "venueId", "value": "1" },
+    { "key": "teamId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ari Santos\",\n  \"email\": \"ari.santos@kickoff.test\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"team_id\": 1\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{baseUrl}}/api/register"
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code === 201) pm.collectionVariables.set('token', pm.response.json().token);"] } }]
+    },
+    {
+      "name": "Login",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@kickoff.test\",\n  \"password\": \"password\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{baseUrl}}/api/login"
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code === 200) pm.collectionVariables.set('token', pm.response.json().token);"] } }]
+    },
+    {
+      "name": "Logout",
+      "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/logout" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code === 204) pm.collectionVariables.set('token', '');"] } }]
+    },
+    { "name": "Current user", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/user" } },
+    {
+      "name": "List sessions (search, filters, page)",
+      "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/sessions?search=passing&status=scheduled&team_id=1&venue_id=1&date=2026-11-15&page=1" }
+    },
+    {
+      "name": "Create session",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"U10 Passing and Movement\",\n  \"description\": \"Combination play and support angles.\",\n  \"session_date\": \"2026-11-15\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"10:30\",\n  \"max_players\": 18,\n  \"coach_id\": 2,\n  \"venue_id\": 1,\n  \"team_id\": 1,\n  \"drills\": [1, 2, 3]\n}", "options": { "raw": { "language": "json" } } },
+        "url": "{{baseUrl}}/api/sessions"
+      }
+    },
+    { "name": "Show session", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/sessions/{{sessionId}}" } },
+    {
+      "name": "Update session (PUT)",
+      "request": { "method": "PUT", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"U10 Passing and Movement - Updated\",\n  \"max_players\": 20\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/sessions/{{sessionId}}" }
+    },
+    {
+      "name": "Update session (PATCH)",
+      "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated session notes.\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/sessions/{{sessionId}}" }
+    },
+    { "name": "Delete session", "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/sessions/{{sessionId}}" } },
+    {
+      "name": "Register for session",
+      "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"remarks\": \"I can attend the full session.\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/sessions/{{sessionId}}/register" }
+    },
+    { "name": "Cancel pending registration", "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/sessions/{{sessionId}}/register" } },
+    {
+      "name": "Change session status",
+      "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"ongoing\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/sessions/{{sessionId}}/status" }
+    },
+    {
+      "name": "List drills (search and category)",
+      "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/drills?search=passing&category=passing&page=1" }
+    },
+    {
+      "name": "Create drill",
+      "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Wall Pass and Go\",\n  \"category\": \"passing\",\n  \"description\": \"One-touch combination exercise.\",\n  \"default_minutes\": 15\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/drills" }
+    },
+    { "name": "Show drill", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/drills/{{drillId}}" } },
+    { "name": "Update drill (PUT)", "request": { "method": "PUT", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Wall Pass and Go\",\n  \"category\": \"passing\",\n  \"default_minutes\": 18\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/drills/{{drillId}}" } },
+    { "name": "Update drill (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"default_minutes\": 20\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/drills/{{drillId}}" } },
+    { "name": "Delete drill", "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/drills/{{drillId}}" } },
+    { "name": "List venues", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/venues?page=1" } },
+    { "name": "Create venue", "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mandaluyong Community Pitch\",\n  \"address\": \"Mandaluyong City, Metro Manila\",\n  \"capacity\": 60\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/venues" } },
+    { "name": "Show venue", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/venues/{{venueId}}" } },
+    { "name": "Update venue (PUT)", "request": { "method": "PUT", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mandaluyong Community Pitch\",\n  \"address\": \"Updated address\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/venues/{{venueId}}" } },
+    { "name": "Update venue (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"capacity\": 75\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/venues/{{venueId}}" } },
+    { "name": "Delete venue", "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/venues/{{venueId}}" } },
+    { "name": "List teams", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/teams?page=1" } },
+    { "name": "Create team", "request": { "method": "POST", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"U13\",\n  \"division\": \"Under 13\",\n  \"description\": \"Development squad for under-13 players.\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/teams" } },
+    { "name": "Show team", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/teams/{{teamId}}" } },
+    { "name": "Update team (PUT)", "request": { "method": "PUT", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"U13\",\n  \"division\": \"Under 13\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/teams/{{teamId}}" } },
+    { "name": "Update team (PATCH)", "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated squad notes.\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/teams/{{teamId}}" } },
+    { "name": "Delete team", "request": { "method": "DELETE", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/teams/{{teamId}}" } },
+    { "name": "List registrations", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/registrations?status=pending&page=1" } },
+    {
+      "name": "Update registration status",
+      "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"approved\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/registrations/{{registrationId}}/status" }
+    },
+    {
+      "name": "Update registration attendance",
+      "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"attended\": true\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/registrations/{{registrationId}}/attendance" }
+    },
+    { "name": "List users (admin)", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/users?search=Miguel&role=coach&is_active=true&page=1" } },
+    { "name": "Show user (admin)", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/users/2" } },
+    { "name": "Update user role/team/active state (admin)", "request": { "method": "PATCH", "header": [{ "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"role\": \"coach\",\n  \"team_id\": 1,\n  \"is_active\": true\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/users/2" } },
+    { "name": "Dashboard", "request": { "method": "GET", "header": [{ "key": "Accept", "value": "application/json" }], "url": "{{baseUrl}}/api/dashboard" } }
+  ]
+}
