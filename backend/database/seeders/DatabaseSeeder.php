@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $playerNames = [
-            'Mateo Dela Cruz', 'Sofia Garcia', 'Enzo Villanueva', 'Isabella Mendoza',
+            'Klint Joseph Taylaran', 'Sofia Garcia', 'Enzo Villanueva', 'Isabella Mendoza',
             'Lorenzo Aquino', 'Mikaela Ramos', 'Rafael Castillo', 'Andrea Flores',
             'Nico Navarro', 'Camille Torres', 'Joaquin Reyes', 'Beatriz Cruz',
             'Gabriel Lim', 'Althea Fernandez', 'Marco Bautista', 'Chloe Rivera',
