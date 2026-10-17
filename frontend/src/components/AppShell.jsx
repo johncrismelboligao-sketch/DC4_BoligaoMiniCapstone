@@ -44,11 +44,11 @@ export function AppShell() {
         </nav>
         <div className="nav-label">Club</div>
         <nav className="sidebar-nav" aria-label="Club navigation">
-          <NavLink to="/club" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
+          <NavLink to={user?.role === 'admin' ? '/club?tab=teams' : '/club'} end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
             {user?.role === 'admin' ? <ShieldCheck size={17} /> : <Dumbbell size={17} />}
             {user?.role === 'admin' ? 'Club management' : 'Drill library'}
           </NavLink>
-          {user?.role === 'admin' && <div className="nav-link nav-static"><Users size={17} />Member directory</div>}
+          {user?.role === 'admin' && <NavLink to="/club?tab=members" className={({ isActive }) => `nav-link ${isActive && location.search.includes('members') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}><Users size={17} />Member directory</NavLink>}
         </nav>
         <div className="sidebar-spacer" />
         <div className="sidebar-footnote">
