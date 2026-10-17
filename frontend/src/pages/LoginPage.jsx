@@ -36,8 +36,8 @@ export function LoginPage() {
         <div className="eyebrow">Welcome back</div><h1>Sign in to KickOff</h1><p>Pick up where your team left off.</p>
         <form className="auth-form" onSubmit={handleSubmit}>
           {error && <div className="form-error" role="alert">{error}</div>}
-          <div className="field"><label htmlFor="email">Email address</label><input id="email" type="email" autoComplete="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="you@club.com" /></div>
-          <div className="field"><label htmlFor="password">Password</label><input id="password" type="password" autoComplete="current-password" required value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Your password" /></div>
+          <div className="field"><label htmlFor="email">Email address</label><input id="email" type="email" autoComplete="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="Enter your email address" /></div>
+          <div className="field"><label htmlFor="password">Password</label><input id="password" type="password" autoComplete="current-password" required value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Enter your password" /></div>
           <button className="primary-button auth-submit" disabled={busy}>{busy ? 'Signing in...' : 'Sign in'}<ArrowRight size={16} /></button>
         </form>
         <div className="auth-switch">New to the club? <Link to="/register">Create a player account</Link></div>
