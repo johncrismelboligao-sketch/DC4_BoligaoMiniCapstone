@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Check, Edit3, Plus, Search, Shield, Trash2, Users } from 'lucide-react'
 import { EmptyState, ErrorBanner, LoadingState, PageHeading, Pagination } from '../components/Ui'
 import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
+import { fetchAllPages } from '../services/fetchAllPages'
 
 const adminTabs = [
   ['teams', 'Teams', '/teams'],
@@ -20,10 +21,10 @@ function blankForm(tab) {
   return { role: 'player', team_id: '', is_active: true }
 }
 
-export function ClubPage() {
+export function ClubPage({ libraryOnly = false }) {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const isAdmin = user?.role === 'admin'
+  const isAdmin = user?.role === 'admin' && !libraryOnly
   const requestedTab = searchParams.get('tab')
   const tab = isAdmin && adminTabs.some(([key]) => key === requestedTab) ? requestedTab : isAdmin ? 'teams' : 'drills'
   const activeTab = adminTabs.find(([key]) => key === tab) || adminTabs[2]
@@ -47,7 +48,7 @@ export function ClubPage() {
   useEffect(() => {
     let active = true
     const params = { page }
-    if (tab === 'members' || tab === 'drills') params.search = appliedSearch
+    if (appliedSearch) params.search = appliedSearch
     if (tab === 'drills' && category) params.category = category
     api.get(activeTab[2], { params })
       .then(({ data }) => {
@@ -63,14 +64,14 @@ export function ClubPage() {
 
   useEffect(() => {
     if (!isAdmin) return
-    api.get('/teams', { params: { page: 1 } }).then(({ data }) => setTeams(data.data || [])).catch(() => {})
+    let active = true
+    fetchAllPages('/teams')
+      .then((allTeams) => { if (active) setTeams(allTeams) })
+      .catch(() => { if (active) setError('Unable to load teams for member management.') })
+    return () => { active = false }
   }, [isAdmin, refresh])
 
-  const displayedRows = useMemo(() => {
-    if (tab === 'members' || tab === 'drills' || !appliedSearch) return rows
-    const query = appliedSearch.toLowerCase()
-    return rows.filter((row) => `${row.name} ${row.address || ''} ${row.division || ''}`.toLowerCase().includes(query))
-  }, [rows, tab, appliedSearch])
+  const displayedRows = rows
 
   function chooseTab(nextTab) {
     setSearchParams({ tab: nextTab })
@@ -104,9 +105,38 @@ export function ClubPage() {
   async function submitForm(event) {
     event.preventDefault()
     const nextErrors = {}
-    if (tab !== 'members' && !form.name?.trim()) nextErrors.name = ['This field is required.']
-    if (tab === 'venues' && !form.address?.trim()) nextErrors.address = ['Enter a venue address.']
-    if (Object.keys(nextErrors).length) return setFormErrors(nextErrors)
+    const name = form.name?.trim() || ''
+
+    if (tab !== 'members' && !name) nextErrors.name = ['Name is required.']
+    if (tab === 'teams' && name.length > 80) nextErrors.name = ['Team name cannot exceed 80 characters.']
+
+    if (tab === 'venues') {
+      if (name.length > 120) nextErrors.name = ['Venue name cannot exceed 120 characters.']
+      if (!form.address?.trim()) nextErrors.address = ['Venue address is required.']
+      if (form.capacity !== '' && form.capacity != null) {
+        const capacity = Number(form.capacity)
+        if (!Number.isInteger(capacity) || capacity < 1 || capacity > 65535) {
+          nextErrors.capacity = ['Capacity must be a whole number from 1 to 65535.']
+        }
+      }
+    }
+
+    if (tab === 'drills') {
+      const minutes = Number(form.default_minutes)
+      if (name.length > 120) nextErrors.name = ['Drill name cannot exceed 120 characters.']
+      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) {
+        nextErrors.default_minutes = ['Duration must be from 1 to 180 minutes.']
+      }
+    }
+
+    if (tab === 'members' && !['admin', 'coach', 'player'].includes(form.role)) {
+      nextErrors.role = ['Choose a valid role.']
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFormErrors(nextErrors)
+      return
+    }
 
     setSaving(true)
     setFormErrors({})
@@ -194,7 +224,7 @@ function ClubFormModal({ tab, form, setForm, teams, errors, editing, saving, onC
       {tab === 'teams' && <>{input('name', 'Team name', { required: true, maxLength: 80 })}{input('division', 'Division', { maxLength: 30 })}<div className="field"><label htmlFor="description">Description</label><textarea id="description" rows="3" value={form.description} onChange={(event) => update('description', event.target.value)} /></div></>}
       {tab === 'venues' && <>{input('name', 'Venue name', { required: true, maxLength: 120 })}{input('address', 'Address', { required: true, maxLength: 255 })}{input('capacity', 'Capacity', { type: 'number', min: 1, max: 65535 })}<div className="field"><label htmlFor="notes">Notes</label><textarea id="notes" rows="3" value={form.notes} onChange={(event) => update('notes', event.target.value)} /></div></>}
       {tab === 'drills' && <>{input('name', 'Drill name', { required: true, maxLength: 120 })}<div className="form-grid"><div className="field"><label htmlFor="category">Category</label><select id="category" value={form.category} onChange={(event) => update('category', event.target.value)}>{categories.map((value) => <option key={value} value={value}>{value}</option>)}</select></div>{input('default_minutes', 'Minutes', { type: 'number', min: 1, max: 180 })}</div><div className="field"><label htmlFor="description">Description</label><textarea id="description" rows="3" value={form.description} onChange={(event) => update('description', event.target.value)} /></div></>}
-      {isMember && <><div className="member-summary"><span className="avatar">{editing?.name?.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span><span><strong>{editing?.name}</strong><small>{editing?.email}</small></span></div><div className="field"><label htmlFor="role">Role</label><select id="role" value={form.role} onChange={(event) => update('role', event.target.value)}><option value="player">Player</option><option value="coach">Coach</option><option value="admin">Admin</option></select></div><div className="field"><label htmlFor="team_id">Team</label><select id="team_id" value={form.team_id} onChange={(event) => update('team_id', event.target.value)}><option value="">No team</option>{teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</select>{fieldError('team_id') && <span className="field-error">{fieldError('team_id')}</span>}</div><label className="toggle-row"><input type="checkbox" checked={Boolean(form.is_active)} onChange={(event) => update('is_active', event.target.checked)} /><span><strong>Account active</strong><small>Inactive accounts cannot sign in.</small></span></label></>}
+      {isMember && <><div className="member-summary"><span className="avatar">{editing?.name?.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span><span><strong>{editing?.name}</strong><small>{editing?.email}</small></span></div><div className="field"><label htmlFor="role">Role</label><select id="role" value={form.role} onChange={(event) => update('role', event.target.value)}><option value="player">Player</option><option value="coach">Coach</option><option value="admin">Admin</option></select>{fieldError('role') && <span className="field-error">{fieldError('role')}</span>}</div><div className="field"><label htmlFor="team_id">Team</label><select id="team_id" value={form.team_id} onChange={(event) => update('team_id', event.target.value)}><option value="">No team</option>{teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</select>{fieldError('team_id') && <span className="field-error">{fieldError('team_id')}</span>}</div><label className="toggle-row"><input type="checkbox" checked={Boolean(form.is_active)} onChange={(event) => update('is_active', event.target.checked)} /><span><strong>Account active</strong><small>Inactive accounts cannot sign in.</small></span></label></>}
       <footer className="modal-actions"><button type="button" className="secondary-button" onClick={onClose}>Cancel</button><button type="submit" className="primary-button" disabled={saving}>{saving ? 'Saving...' : editing ? 'Save changes' : 'Create record'}</button></footer>
     </form>
   </section></div>

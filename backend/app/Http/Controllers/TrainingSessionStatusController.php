@@ -27,6 +27,8 @@ class TrainingSessionStatusController extends Controller
 
         $session->update(['status' => $nextStatus]);
 
-        return new TrainingSessionResource($session->refresh()->load(['coach', 'venue', 'team', 'drills'])->loadCount('registrations'));
+        return new TrainingSessionResource($session->refresh()->load(['coach', 'venue', 'team', 'drills'])->loadCount([
+            'registrations' => fn ($query) => $query->whereIn('status', ['pending', 'approved']),
+        ]));
     }
 }

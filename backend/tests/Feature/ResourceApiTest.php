@@ -93,4 +93,22 @@ class ResourceApiTest extends TestCase
         $this->patchJson("/api/sessions/{$session->id}", ['end_time' => '11:00'])
             ->assertOk()->assertJsonPath('data.end_time', '11:00');
     }
+
+    public function test_start_time_cannot_be_after_saved_end_time(): void
+    {
+        $team = Team::factory()->create();
+        $coach = User::factory()->create(['role' => 'coach', 'team_id' => $team->id]);
+        $session = TrainingSession::factory()->create([
+            'team_id' => $team->id,
+            'coach_id' => $coach->id,
+            'venue_id' => Venue::factory()->create()->id,
+            'start_time' => '09:00',
+            'end_time' => '10:30',
+        ]);
+
+        $this->actingAs($coach, 'sanctum')
+            ->patchJson("/api/sessions/{$session->id}", ['start_time' => '11:00'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('end_time');
+    }
 }

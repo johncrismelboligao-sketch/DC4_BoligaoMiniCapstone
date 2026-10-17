@@ -15,17 +15,12 @@ class UpdateTrainingSessionRequest extends FormRequest
 
     public function rules(): array
     {
-        $session = $this->route('session');
-        $startTimeRule = $this->has('start_time')
-            ? 'after:start_time'
-            : 'after:'.substr($session instanceof TrainingSession ? $session->start_time : '00:00', 0, 5);
-
         return [
             'title' => ['sometimes', 'required', 'string', 'max:160'],
             'description' => ['sometimes', 'nullable', 'string'],
             'session_date' => ['sometimes', 'required', 'date'],
             'start_time' => ['sometimes', 'required', 'date_format:H:i'],
-            'end_time' => ['sometimes', 'required', 'date_format:H:i', $startTimeRule],
+            'end_time' => ['sometimes', 'required', 'date_format:H:i'],
             'max_players' => ['sometimes', 'required', 'integer', 'min:1', 'max:100'],
             'coach_id' => ['sometimes', 'required', 'integer', Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'coach')->where('is_active', true))],
             'venue_id' => ['sometimes', 'required', 'integer', Rule::exists('venues', 'id')],
@@ -33,5 +28,30 @@ class UpdateTrainingSessionRequest extends FormRequest
             'drills' => ['sometimes', 'array'],
             'drills.*' => ['integer', 'distinct', Rule::exists('drills', 'id')],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $session = $this->route('session');
+
+            if (!$session instanceof TrainingSession) {
+                return;
+            }
+
+            if (
+                $validator->errors()->has('start_time') ||
+                $validator->errors()->has('end_time')
+            ) {
+                return;
+            }
+
+            $start = $this->input('start_time', substr($session->start_time, 0, 5));
+            $end = $this->input('end_time', substr($session->end_time, 0, 5));
+
+            if ($end <= $start) {
+                $validator->errors()->add('end_time', 'End time must be after start time.');
+            }
+        });
     }
 }

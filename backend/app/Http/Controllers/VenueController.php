@@ -14,7 +14,18 @@ class VenueController extends Controller
     {
         $this->authorize('viewAny', Venue::class);
 
-        return VenueResource::collection(Venue::withCount('trainingSessions')->orderBy('name')->paginate(10)->withQueryString());
+        $venues = Venue::query()
+            ->withCount('trainingSessions')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $term = '%'.$request->string('search')->toString().'%';
+                $query->where(fn ($query) => $query->where('name', 'like', $term)
+                    ->orWhere('address', 'like', $term));
+            })
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
+
+        return VenueResource::collection($venues);
     }
 
     public function store(StoreVenueRequest $request)
@@ -42,8 +53,15 @@ class VenueController extends Controller
     public function destroy(Venue $venue)
     {
         $this->authorize('delete', $venue);
+
+        if ($venue->trainingSessions()->exists()) {
+            return response()->json([
+                'message' => 'This venue cannot be deleted because it is used by training sessions.',
+            ], 409);
+        }
+
         $venue->delete();
 
-        return response()->json([], 204);
+        return response()->noContent();
     }
 }

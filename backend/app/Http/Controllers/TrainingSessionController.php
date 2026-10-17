@@ -16,7 +16,9 @@ class TrainingSessionController extends Controller
     {
         $this->authorize('viewAny', TrainingSession::class);
 
-        $query = TrainingSession::query()->with(['coach', 'venue', 'team', 'drills'])->withCount('registrations');
+        $query = TrainingSession::query()->with(['coach', 'venue', 'team', 'drills'])->withCount([
+            'registrations' => fn ($query) => $query->whereIn('status', ['pending', 'approved']),
+        ]);
         $user = $request->user();
 
         if ($user->role === 'coach') {
@@ -49,7 +51,9 @@ class TrainingSessionController extends Controller
             return $session;
         });
 
-        return (new TrainingSessionResource($session->load(['coach', 'venue', 'team', 'drills'])->loadCount('registrations')))
+        return (new TrainingSessionResource($session->load(['coach', 'venue', 'team', 'drills'])->loadCount([
+            'registrations' => fn ($query) => $query->whereIn('status', ['pending', 'approved']),
+        ])))
             ->response()->setStatusCode(201);
     }
 
@@ -57,7 +61,9 @@ class TrainingSessionController extends Controller
     {
         $this->authorize('view', $session);
 
-        return new TrainingSessionResource($session->load(['coach', 'venue', 'team', 'drills'])->loadCount('registrations'));
+        return new TrainingSessionResource($session->load(['coach', 'venue', 'team', 'drills'])->loadCount([
+            'registrations' => fn ($query) => $query->whereIn('status', ['pending', 'approved']),
+        ]));
     }
 
     public function update(UpdateTrainingSessionRequest $request, TrainingSession $session)
@@ -78,7 +84,9 @@ class TrainingSessionController extends Controller
             }
         });
 
-        return new TrainingSessionResource($session->refresh()->load(['coach', 'venue', 'team', 'drills'])->loadCount('registrations'));
+        return new TrainingSessionResource($session->refresh()->load(['coach', 'venue', 'team', 'drills'])->loadCount([
+            'registrations' => fn ($query) => $query->whereIn('status', ['pending', 'approved']),
+        ]));
     }
 
     public function destroy(TrainingSession $session)

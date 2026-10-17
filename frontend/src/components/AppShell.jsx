@@ -19,7 +19,11 @@ export function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const pageName = navigation.find((item) => location.pathname.startsWith(item.path))?.label
-    ?? (location.pathname === '/club' ? 'Club management' : 'KickOff')
+    ?? (location.pathname === '/admin/club'
+      ? 'Club management'
+      : location.pathname === '/club'
+        ? 'Drill library'
+        : 'KickOff')
 
   async function handleLogout() {
     await logout()
@@ -42,14 +46,57 @@ export function AppShell() {
             </NavLink>
           ))}
         </nav>
-        <div className="nav-label">Club</div>
-        <nav className="sidebar-nav" aria-label="Club navigation">
-          <NavLink to={user?.role === 'admin' ? '/club?tab=teams' : '/club'} end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setMenuOpen(false)}>
-            {user?.role === 'admin' ? <ShieldCheck size={17} /> : <Dumbbell size={17} />}
-            {user?.role === 'admin' ? 'Club management' : 'Drill library'}
-          </NavLink>
-          {user?.role === 'admin' && <NavLink to="/club?tab=members" className={({ isActive }) => `nav-link ${isActive && location.search.includes('members') ? 'active' : ''}`} onClick={() => setMenuOpen(false)}><Users size={17} />Member directory</NavLink>}
-        </nav>
+       <div className="nav-label">Club</div>
+
+<nav className="sidebar-nav" aria-label="Club navigation">
+  <NavLink
+    to="/club"
+    end
+    className={({ isActive }) =>
+      `nav-link ${isActive ? 'active' : ''}`
+    }
+    onClick={() => setMenuOpen(false)}
+  >
+    <Dumbbell size={17} />
+    Drill library
+  </NavLink>
+
+  {user?.role === 'admin' && (
+    <>
+      <NavLink
+        to="/admin/club?tab=teams"
+        className={() =>
+          `nav-link ${
+            location.pathname === '/admin/club' &&
+            !location.search.includes('members')
+              ? 'active'
+              : ''
+          }`
+        }
+        onClick={() => setMenuOpen(false)}
+      >
+        <ShieldCheck size={17} />
+        Club management
+      </NavLink>
+
+      <NavLink
+        to="/admin/club?tab=members"
+        className={() =>
+          `nav-link ${
+            location.pathname === '/admin/club' &&
+            location.search.includes('members')
+              ? 'active'
+              : ''
+          }`
+        }
+        onClick={() => setMenuOpen(false)}
+      >
+        <Users size={17} />
+        Member directory
+      </NavLink>
+    </>
+  )}
+</nav>
         <div className="sidebar-spacer" />
         <div className="sidebar-footnote">
           <strong>{user?.team?.name || (user?.role === 'admin' ? 'Club administration' : 'KickOff Academy')}</strong>

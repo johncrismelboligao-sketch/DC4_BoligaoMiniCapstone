@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorBanner, EmptyState, LoadingState, PageHeading, Pagination, StatusBadge } from '../components/Ui'
 import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
+import { fetchAllPages } from '../services/fetchAllPages'
 import { formatTime } from '../utils/date'
 
 const initialFilters = { search: '', status: '', team_id: '', venue_id: '', date: '' }
@@ -30,6 +31,7 @@ export function SessionsPage() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [selected, setSelected] = useState(null)
+  const [detailFailed, setDetailFailed] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
   const [form, setForm] = useState(null)
   const [formSessionId, setFormSessionId] = useState(null)
@@ -58,25 +60,31 @@ export function SessionsPage() {
   useEffect(() => {
     if (!sessionId) return
     let active = true
+    setDetailFailed(false)
     api.get(`/sessions/${sessionId}`)
       .then(({ data }) => { if (active) setSelected(data.data) })
-      .catch(() => { if (active) setError('This session could not be found or is outside your team.') })
+      .catch(() => {
+        if (!active) return
+        setDetailFailed(true)
+        setError('This session could not be found or is outside your team.')
+      })
     return () => { active = false }
   }, [sessionId, refresh])
 
   useEffect(() => {
-    if (!canManage) return
+    let active = true
     Promise.all([
-      api.get('/teams'),
-      api.get('/venues'),
-      api.get('/drills'),
-      isAdmin ? api.get('/users', { params: { role: 'coach', is_active: true, per_page: 100 } }) : Promise.resolve({ data: { data: [] } }),
-    ]).then(([teams, venues, drills, coaches]) => setOptions({
-      teams: teams.data.data || [],
-      venues: venues.data.data || [],
-      drills: drills.data.data || [],
-      coaches: coaches.data.data || [],
-    })).catch(() => {})
+      fetchAllPages('/teams'),
+      fetchAllPages('/venues'),
+      canManage ? fetchAllPages('/drills') : Promise.resolve([]),
+      isAdmin ? fetchAllPages('/users', { role: 'coach', is_active: 1 }) : Promise.resolve([]),
+    ]).then(([teams, venues, drills, coaches]) => {
+      if (active) setOptions({ teams, venues, drills, coaches })
+    }).catch(() => {
+      if (active) setError('Unable to load session options.')
+    })
+
+    return () => { active = false }
   }, [canManage, isAdmin])
 
   function applyFilters(event) {
@@ -110,14 +118,30 @@ export function SessionsPage() {
   async function submitSession(event) {
     event.preventDefault()
     const errors = {}
-    if (!form.title.trim()) errors.title = ['Enter a session title.']
+    const title = form.title.trim()
+    const maxPlayers = Number(form.max_players)
+
+    if (!title) errors.title = ['Session title is required.']
+    else if (title.length > 160) errors.title = ['Title must not exceed 160 characters.']
+
     if (!form.session_date) errors.session_date = ['Choose a session date.']
-    if (!form.start_time || !form.end_time) errors.start_time = ['Enter both session times.']
+    else if (!formSessionId && form.session_date < localToday()) errors.session_date = ['Session date cannot be in the past.']
+
+    if (!form.start_time) errors.start_time = ['Start time is required.']
+    if (!form.end_time) errors.end_time = ['End time is required.']
     if (form.start_time && form.end_time && form.end_time <= form.start_time) errors.end_time = ['End time must be after start time.']
+
+    if (!Number.isInteger(maxPlayers) || maxPlayers < 1 || maxPlayers > 100) {
+      errors.max_players = ['Enter a whole number from 1 to 100.']
+    }
+
     if (!form.venue_id) errors.venue_id = ['Choose a venue.']
     if (!form.team_id) errors.team_id = ['Choose a team.']
     if (isAdmin && !form.coach_id) errors.coach_id = ['Assign a coach.']
-    if (Object.keys(errors).length) return setFormErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
+      return
+    }
 
     setSaving(true)
     setFormErrors({})
@@ -192,7 +216,7 @@ export function SessionsPage() {
     {notice && <div className="success-banner" role="status"><Check size={15} />{notice}</div>}
     {error && <ErrorBanner onRetry={() => { setLoading(true); setRefresh((value) => value + 1) }}>{error}</ErrorBanner>}
 
-    {detail ? <SessionDetail session={displayedSession} user={user} onBack={() => navigate('/sessions')} onEdit={() => openEdit(displayedSession)} onDelete={() => deleteSession(displayedSession)} onRegister={() => registerForSession(displayedSession)} onStatusChange={changeSessionStatus} canManage={canManage} isAdmin={isAdmin} /> : <>
+    {detail ? <SessionDetail session={displayedSession} detailFailed={detailFailed} user={user} onBack={() => navigate('/sessions')} onEdit={() => openEdit(displayedSession)} onDelete={() => deleteSession(displayedSession)} onRegister={() => registerForSession(displayedSession)} onStatusChange={changeSessionStatus} canManage={canManage} isAdmin={isAdmin} /> : <>
       <form className="filter-bar" onSubmit={applyFilters}>
         <label className="search-field"><Search size={16} /><input aria-label="Search sessions" placeholder="Search by session title" value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} /></label>
         <select aria-label="Filter by status" value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })}><option value="">All statuses</option><option value="scheduled">Scheduled</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
@@ -227,8 +251,12 @@ function SessionRow({ session, user, canManage, isAdmin, onOpen, onEdit, onDelet
   </article>
 }
 
-function SessionDetail({ session, user, onBack, onEdit, onDelete, onRegister, onStatusChange, canManage, isAdmin }) {
-  if (!session) return <LoadingState label="Loading session details..." />
+function SessionDetail({ session, detailFailed, user, onBack, onEdit, onDelete, onRegister, onStatusChange, canManage, isAdmin }) {
+  if (!session) {
+    return detailFailed
+      ? <EmptyState title="Session unavailable" detail="The session may have been deleted, or you may not have permission to view it." />
+      : <LoadingState label="Loading session details..." />
+  }
   return <section className="session-detail surface-panel">
     <button className="back-link" onClick={onBack}><ArrowLeft size={15} />Back to sessions</button>
     <div className="detail-heading"><div><div className="eyebrow">{session.team?.name} · {session.session_date}</div><h2>{session.title}</h2><p>{session.description || 'Training session details and planned drills.'}</p></div><StatusBadge status={session.status} /></div>

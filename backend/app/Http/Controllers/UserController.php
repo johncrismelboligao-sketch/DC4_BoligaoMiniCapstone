@@ -36,7 +36,12 @@ class UserController extends Controller
     public function update(UpdateManagedUserRequest $request, User $user)
     {
         $this->authorize('update', $user);
-        $user->update($request->validated());
+        $data = $request->validated();
+        $user->update($data);
+
+        if (array_key_exists('is_active', $data) && ! $user->is_active) {
+            $user->tokens()->delete();
+        }
 
         return new UserResource($user->refresh()->load('team'));
     }

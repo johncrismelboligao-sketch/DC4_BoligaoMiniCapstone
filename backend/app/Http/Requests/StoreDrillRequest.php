@@ -15,7 +15,14 @@ class StoreDrillRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:120'],
+            'name' => [
+                'required',
+                'string',
+                'max:120',
+                Rule::unique('drills', 'name')->where(
+                    fn ($query) => $query->where('category', $this->input('category'))
+                ),
+            ],
             'category' => ['required', Rule::in(['passing', 'dribbling', 'shooting', 'fitness', 'defending'])],
             'description' => ['nullable', 'string'],
             'default_minutes' => ['required', 'integer', 'min:1', 'max:180'],

@@ -24,7 +24,11 @@ function AppRoutes() {
           <Route path="/sessions" element={<SessionsPage />} />
           <Route path="/sessions/:sessionId" element={<SessionsPage />} />
           <Route path="/registrations" element={<RegistrationsPage />} />
-          <Route path="/club" element={<ClubPage />} />
+          <Route path="/club" element={<ClubPage libraryOnly />} />
+          <Route element={<ProtectedRoute roles={['admin']} />}>
+            <Route path="/admin/club" element={<ClubPage />} />
+          </Route>
+
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Route>

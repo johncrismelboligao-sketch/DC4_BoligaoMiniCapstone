@@ -308,9 +308,10 @@ a { color: inherit; }
   .topbar-right { gap: 9px; }
   .profile-copy { display: none; }
   .page-content { padding: 24px 16px 38px; }
-  .page-heading { align-items: flex-start; margin-bottom: 20px; }
+    .page-heading { flex-direction: column; align-items: stretch; gap: 14px; margin-bottom: 20px; }
   .page-heading h1 { font-size: 29px; }
-  .page-heading-action { display: none; }
+    .page-heading-action { display: block; width: 100%; }
+    .page-heading-action .primary-button { width: 100%; justify-content: center; }
   .stat-card { padding: 14px; }
   .stat-number { font-size: 30px; }
   .schedule-panel, .attendance-panel { padding: 16px; }
@@ -324,7 +325,7 @@ a { color: inherit; }
   .filter-submit { width: 100%; }
   .session-row { align-items: flex-start; flex-direction: column; gap: 10px; }
   .session-row-main { width: 100%; }
-  .session-row-aside { width: 100%; justify-content: space-between; padding-left: 55px; }
+    .session-row-aside { width: 100%; justify-content: space-between; padding-left: 0; flex-wrap: wrap; gap: 10px; }
   .session-row-aside .row-actions { margin-left: auto; }
   .session-detail { padding: 16px; }
   .detail-facts { grid-template-columns: 1fr; }
