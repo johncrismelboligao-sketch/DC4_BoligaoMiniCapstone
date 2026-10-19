@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorBanner, EmptyState, LoadingState, PageHeading, Pagination, StatusBadge } from '../components/Ui'
 import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
+import { clearDraft, draftStorageKey, readDraft, writeDraft } from '../services/drafts'
 import { fetchAllPages } from '../services/fetchAllPages'
 import { formatTime } from '../utils/date'
 
@@ -39,6 +40,36 @@ export function SessionsPage() {
   const [saving, setSaving] = useState(false)
   const [refresh, setRefresh] = useState(0)
   const [options, setOptions] = useState({ teams: [], venues: [], drills: [], coaches: [] })
+  const [draftsReady, setDraftsReady] = useState(false)
+
+  const sessionDraftKey = draftStorageKey('session-form', user?.id)
+  const filterDraftKey = draftStorageKey('session-filters', user?.id)
+
+  useEffect(() => {
+    if (!user?.id) return
+    const savedFilters = readDraft(filterDraftKey)
+    if (savedFilters?.filters) {
+      setFilters({ ...initialFilters, ...savedFilters.filters })
+      setAppliedFilters({ ...initialFilters, ...(savedFilters.appliedFilters || savedFilters.filters) })
+    }
+    const savedForm = readDraft(sessionDraftKey)
+    if (savedForm?.form) {
+      setForm(savedForm.form)
+      setFormSessionId(savedForm.sessionId || null)
+      setFormOpen(true)
+    }
+    setDraftsReady(true)
+  }, [user?.id])
+
+  useEffect(() => {
+    if (!draftsReady || !user?.id) return
+    writeDraft(filterDraftKey, { filters, appliedFilters })
+  }, [draftsReady, user?.id, filters, appliedFilters])
+
+  useEffect(() => {
+    if (!draftsReady || !user?.id || !formOpen || !form) return
+    writeDraft(sessionDraftKey, { form, sessionId: formSessionId })
+  }, [draftsReady, user?.id, formOpen, form, formSessionId])
 
   const canManage = user?.role === 'admin' || user?.role === 'coach'
   const isAdmin = user?.role === 'admin'
@@ -158,6 +189,7 @@ export function SessionsPage() {
         setSelected(data.data)
         setNotice('Training session created.')
       }
+      clearDraft(sessionDraftKey)
       setFormOpen(false)
       setLoading(true)
       setRefresh((value) => value + 1)
@@ -234,7 +266,7 @@ export function SessionsPage() {
       <Pagination currentPage={meta.current_page || page} lastPage={meta.last_page || 1} onPageChange={(nextPage) => { setPage(nextPage); setLoading(true) }} />
     </>}
 
-    {formOpen && <SessionFormModal form={form} setForm={setForm} errors={formErrors} options={options} isAdmin={isAdmin} saving={saving} onClose={() => setFormOpen(false)} onSubmit={submitSession} isEditing={Boolean(formSessionId)} />}
+    {formOpen && form && <SessionFormModal form={form} setForm={setForm} errors={formErrors} options={options} isAdmin={isAdmin} saving={saving} onClose={() => setFormOpen(false)} onSubmit={submitSession} isEditing={Boolean(formSessionId)} />}
   </>
 }
 

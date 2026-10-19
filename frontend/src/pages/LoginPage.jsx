@@ -8,7 +8,7 @@ export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [form, setForm] = useState({ email: 'admin@gmail.com', password: 'password' })
+  const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -54,7 +54,7 @@ export function LoginPage() {
             <div className="field"><label htmlFor="password">Password</label><div className="password-control"><input id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" required value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Enter your password" /><button className="password-visibility" type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword((value) => !value)}>{showPassword ? <Eye size={17} /> : <EyeOff size={17} />}</button></div></div>
             <button className="primary-button auth-submit" disabled={busy}>{busy ? 'Signing in...' : 'Sign in'}</button>
           </form>
-          <div className="login-demo"><span>Demo: admin@gmail.com / password</span><button className="demo-fill" type="button" onClick={() => setForm({ email: 'admin@gmail.com', password: 'password' })}>Fill details</button></div>
+
         </div>
         <div className="login-meta">Manila · Community football</div>
       </section>

@@ -1,5 +1,7 @@
 ﻿import { useState } from 'react'
+import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { clearDraft, draftStorageKey, readDraft, writeDraft } from '../services/drafts'
 import { useAuth } from '../context/useAuth'
 import { SoccerBallLogo } from '../components/SoccerBallLogo'
 
@@ -9,6 +11,19 @@ export function RegisterPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', password_confirmation: '' })
   const [errors, setErrors] = useState({})
   const [busy, setBusy] = useState(false)
+  const [draftLoaded, setDraftLoaded] = useState(false)
+  const registrationDraftKey = draftStorageKey('registration', 'guest')
+
+  useEffect(() => {
+    const saved = readDraft(registrationDraftKey)
+    if (saved) setForm((current) => ({ ...current, name: saved.name || '', email: saved.email || '' }))
+    setDraftLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (!draftLoaded) return
+    writeDraft(registrationDraftKey, { name: form.name, email: form.email })
+  }, [draftLoaded, form.name, form.email])
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -23,6 +38,7 @@ export function RegisterPage() {
     setBusy(true)
     try {
       await register(form)
+      clearDraft(registrationDraftKey)
       navigate('/dashboard', { replace: true })
     } catch (requestError) {
       setErrors(requestError.response?.data?.errors || { form: requestError.response?.data?.message || 'Could not connect to the API.' })

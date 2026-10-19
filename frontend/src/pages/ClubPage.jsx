@@ -4,6 +4,7 @@ import { Check, Edit3, Plus, Search, Shield, Trash2, Users } from 'lucide-react'
 import { EmptyState, ErrorBanner, LoadingState, PageHeading, Pagination } from '../components/Ui'
 import { useAuth } from '../context/useAuth'
 import { api } from '../services/api'
+import { clearDraft, draftStorageKey, readDraft, writeDraft } from '../services/drafts'
 import { fetchAllPages } from '../services/fetchAllPages'
 
 const adminTabs = [
@@ -44,6 +45,29 @@ export function ClubPage({ libraryOnly = false }) {
   const [formErrors, setFormErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [refresh, setRefresh] = useState(0)
+  const [restoredDraftKey, setRestoredDraftKey] = useState(null)
+  const formDraftKey = draftStorageKey(`club-form-${tab}`, user?.id)
+
+  useEffect(() => {
+    if (!user?.id) return
+    setModal(false)
+    setEditing(null)
+    setRestoredDraftKey(null)
+    const saved = readDraft(formDraftKey)
+    if (saved?.form) {
+      setForm(saved.form)
+      setEditing(saved.editing || null)
+      setModal(true)
+    } else {
+      setForm(blankForm(tab))
+    }
+    setRestoredDraftKey(formDraftKey)
+  }, [user?.id, tab])
+
+  useEffect(() => {
+    if (!user?.id || !modal || !form || restoredDraftKey !== formDraftKey) return
+    writeDraft(formDraftKey, { form, editing })
+  }, [user?.id, modal, form, editing, restoredDraftKey, formDraftKey])
 
   useEffect(() => {
     let active = true
@@ -152,6 +176,7 @@ export function ClubPage({ libraryOnly = false }) {
         await api.post(activeTab[2], payload)
         setNotice(`${activeTab[1].slice(0, -1)} created.`)
       }
+      clearDraft(formDraftKey)
       setModal(false)
       setRefresh((value) => value + 1)
       window.setTimeout(() => setNotice(''), 3200)
