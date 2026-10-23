@@ -76,9 +76,17 @@ class DatabaseSeeder extends Seeder
         ]));
 
         $sessions = collect();
+        $sessionTitlesByAgeGroup = [
+            ['U10 Ball Mastery', 'U10 Dribbling and Control', 'U10 Passing Basics'],
+            ['U12 Passing Patterns', 'U12 First Touch and Movement', 'U12 Small-Sided Games'],
+            ['U15 Finishing and Movement', 'U15 Combination Play', 'U15 Speed and Agility'],
+            ['U18 Defensive Shape', 'U18 Pressing and Transition', 'U18 Match Preparation'],
+        ];
         for ($index = 0; $index < 25; $index++) {
             $team = $teams[$index % 4];
-            $coach = $coaches[$index % 2];
+            // Rotate coaches by age-group block so each team has sessions with both coaches.
+            $coach = $coaches[intdiv($index, 4) % 2];
+            $teamTitles = $sessionTitlesByAgeGroup[$index % 4];
             $sessionDate = $index < 8
                 ? Carbon::today()->subDays(8 - $index)
                 : ($index === 8 ? Carbon::today() : Carbon::today()->addDays($index - 8));
@@ -90,7 +98,7 @@ class DatabaseSeeder extends Seeder
             };
 
             $session = TrainingSession::factory()->create([
-                'title' => ['U10 Ball Mastery', 'U12 Passing Patterns', 'U15 Finishing and Movement', 'U18 Defensive Shape'][$index % 4],
+                'title' => $teamTitles[intdiv($index, 4) % count($teamTitles)],
                 'description' => 'Age-appropriate technical and tactical training with coached small-sided play.',
                 'session_date' => $sessionDate,
                 'status' => $status,

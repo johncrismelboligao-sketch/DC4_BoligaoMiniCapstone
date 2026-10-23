@@ -14,17 +14,26 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
     {
+        $role = $request->validated('role') === 'coach' ? 'coach' : 'player';
         $user = User::create([
             ...$request->validated(),
-            'role' => 'player',
-            'is_active' => true,
+            'role' => $role,
+            'is_active' => $role === 'player',
         ]);
 
-        return response()->json([
-            'message' => 'Account created successfully.',
-            'token' => $user->createToken('kickoff-api')->plainTextToken,
+        $response = [
+            'message' => $role === 'coach'
+                ? 'Coach application submitted. An admin must approve your account before you can sign in.'
+                : 'Player account created successfully.',
+            'status' => $role === 'coach' ? 'pending_approval' : 'active',
             'user' => new UserResource($user->load('team')),
-        ], 201);
+        ];
+
+        if ($role === 'player') {
+            $response['token'] = $user->createToken('kickoff-api')->plainTextToken;
+        }
+
+        return response()->json($response, 201);
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -51,6 +60,6 @@ class AuthController extends Controller
 
     public function user(Request $request): UserResource
     {
-        return new UserResource($request->user()->load('team'));
+        return new UserResource($request->user()->load(['team', 'coach.team']));
     }
 }

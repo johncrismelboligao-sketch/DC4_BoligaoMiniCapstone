@@ -25,6 +25,12 @@ class TrainingSessionController extends Controller
             $query->where('coach_id', $user->id);
         } elseif ($user->role === 'player') {
             $query->where('team_id', $user->team_id);
+            if ($user->coach_id) {
+                $query->where('coach_id', $user->coach_id);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+            $query->with(['registrations' => fn ($registrations) => $registrations->where('user_id', $user->id)->with('requestedDrills')]);
         }
 
         $query->when($request->filled('search'), fn ($query) => $query->where('title', 'like', '%'.$request->string('search')->toString().'%'))
@@ -61,7 +67,12 @@ class TrainingSessionController extends Controller
     {
         $this->authorize('view', $session);
 
-        return new TrainingSessionResource($session->load(['coach', 'venue', 'team', 'drills'])->loadCount([
+        $session->load(['coach', 'venue', 'team', 'drills']);
+        if (request()->user()->role === 'player') {
+            $session->load(['registrations' => fn ($registrations) => $registrations->where('user_id', request()->user()->id)->with('requestedDrills')]);
+        }
+
+        return new TrainingSessionResource($session->loadCount([
             'registrations' => fn ($query) => $query->whereIn('status', ['pending', 'approved']),
         ]));
     }

@@ -16,6 +16,7 @@ class RegistrationResource extends JsonResource
             'remarks' => $this->remarks,
             'created_at' => $this->created_at?->toISOString(),
             'user' => new UserResource($this->whenLoaded('user')),
+            'requested_drills' => DrillResource::collection($this->whenLoaded('requestedDrills')),
             'training_session' => new TrainingSessionResource($this->whenLoaded('trainingSession')),
         ];
     }

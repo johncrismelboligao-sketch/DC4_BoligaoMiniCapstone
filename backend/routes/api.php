@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CoachApplicationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DrillController;
 use App\Http\Controllers\RegistrationController;
@@ -13,10 +14,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/registration/teams', function () {
+    return \App\Models\Team::query()->orderBy('name')->get(['id', 'name', 'division']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/coaches', [CoachApplicationController::class, 'coaches']);
+    Route::get('/coach-applications', [CoachApplicationController::class, 'index']);
+    Route::post('/coach-applications', [CoachApplicationController::class, 'store'])->middleware('role:player');
+    Route::patch('/coach-applications/{coachApplication}', [CoachApplicationController::class, 'update'])->middleware('role:admin,coach');
 
     Route::apiResource('sessions', TrainingSessionController::class)->only(['index', 'show']);
     Route::post('/sessions', [TrainingSessionController::class, 'store'])->middleware('role:admin,coach');

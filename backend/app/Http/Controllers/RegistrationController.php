@@ -16,7 +16,7 @@ class RegistrationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Registration::query()->with(['user.team', 'trainingSession.coach', 'trainingSession.venue', 'trainingSession.team', 'trainingSession.drills']);
+        $query = Registration::query()->with(['user.team', 'requestedDrills', 'trainingSession.coach', 'trainingSession.venue', 'trainingSession.team', 'trainingSession.drills']);
         $user = $request->user();
 
         if ($user->role === 'coach') {
@@ -55,15 +55,19 @@ class RegistrationController extends Controller
                 throw ValidationException::withMessages(['session' => 'This training session has reached its player limit.']);
             }
 
-            return Registration::create([
+            $registration = Registration::create([
                 'user_id' => $user->id,
                 'training_session_id' => $session->id,
                 'status' => 'pending',
                 'remarks' => $request->validated('remarks'),
             ]);
+
+            $registration->requestedDrills()->sync($request->validated('drills'));
+
+            return $registration;
         });
 
-        return (new RegistrationResource($registration->load(['user.team', 'trainingSession.coach', 'trainingSession.venue', 'trainingSession.team', 'trainingSession.drills'])))
+        return (new RegistrationResource($registration->load(['user.team', 'requestedDrills', 'trainingSession.coach', 'trainingSession.venue', 'trainingSession.team', 'trainingSession.drills'])))
             ->response()->setStatusCode(201);
     }
 
@@ -92,7 +96,7 @@ class RegistrationController extends Controller
 
         $registration->update(['status' => $request->validated('status')]);
 
-        return new RegistrationResource($registration->refresh()->load(['user.team', 'trainingSession.coach', 'trainingSession.venue', 'trainingSession.team', 'trainingSession.drills']));
+        return new RegistrationResource($registration->refresh()->load(['user.team', 'requestedDrills', 'trainingSession.coach', 'trainingSession.venue', 'trainingSession.team', 'trainingSession.drills']));
     }
 
     public function updateAttendance(UpdateRegistrationAttendanceRequest $request, Registration $registration)
@@ -105,6 +109,6 @@ class RegistrationController extends Controller
 
         $registration->update(['attended' => $request->validated('attended')]);
 
-        return new RegistrationResource($registration->refresh()->load(['user.team', 'trainingSession.coach', 'trainingSession.venue', 'trainingSession.team', 'trainingSession.drills']));
+        return new RegistrationResource($registration->refresh()->load(['user.team', 'requestedDrills', 'trainingSession.coach', 'trainingSession.venue', 'trainingSession.team', 'trainingSession.drills']));
     }
 }

@@ -42,9 +42,11 @@ export function AuthProvider({ children }) {
 
   async function register(details) {
     const { data } = await api.post('/register', details)
-    storeToken(data.token)
-    setUser(data.user)
-    return data.user
+    if (data.token) {
+      storeToken(data.token)
+      setUser(data.user)
+    }
+    return data
   }
 
   async function logout() {

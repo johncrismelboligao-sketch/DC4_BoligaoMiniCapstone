@@ -18,8 +18,10 @@ class UserResource extends JsonResource
             'position' => $this->position,
             'date_of_birth' => $this->date_of_birth?->toDateString(),
             'team_id' => $this->team_id,
+            'coach_id' => $this->coach_id,
             'is_active' => $this->is_active,
             'team' => new TeamResource($this->whenLoaded('team')),
+            'coach' => new UserResource($this->whenLoaded('coach')),
         ];
     }
 }

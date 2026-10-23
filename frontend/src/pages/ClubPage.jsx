@@ -227,7 +227,7 @@ function tableHeaders(tab) {
 
 function ClubRow({ row, tab, isAdmin, onEdit, onDelete }) {
   return <tr>
-    {tab === 'members' && <><td><strong>{row.name}</strong><small>{row.email}</small></td><td><span className={`role-token role-${row.role}`}>{row.role}</span></td><td>{row.team?.name || 'Unassigned'}</td><td><span className={`active-token ${row.is_active ? 'is-active' : 'is-inactive'}`}><i />{row.is_active ? 'Active' : 'Inactive'}</span></td></>}
+    {tab === 'members' && <><td><strong>{row.name}</strong><small>{row.email}</small></td><td><span className={`role-token role-${row.role}`}>{row.role}</span></td><td>{row.team?.name || 'Unassigned'}</td><td><span className={`active-token ${row.is_active ? 'is-active' : 'is-inactive'}`}><i />{row.is_active ? 'Active' : row.role === 'coach' ? 'Pending approval' : 'Inactive'}</span></td></>}
     {tab === 'teams' && <><td><strong>{row.name}</strong></td><td>{row.division || '—'}</td><td>{row.players_count ?? 0}</td><td>{row.sessions_count ?? 0}</td></>}
     {tab === 'venues' && <><td><strong>{row.name}</strong></td><td>{row.address}</td><td>{row.capacity || '—'}</td><td>{row.sessions_count ?? 0}</td></>}
     {tab === 'drills' && <><td><strong>{row.name}</strong></td><td><span className="category-token">{row.category}</span></td><td>{row.default_minutes} min</td><td className="table-description">{row.description || '—'}</td></>}

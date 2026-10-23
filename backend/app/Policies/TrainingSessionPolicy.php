@@ -16,7 +16,7 @@ class TrainingSessionPolicy
     {
         return $user->role === 'admin'
             || ($user->role === 'coach' && $session->coach_id === $user->id)
-            || ($user->role === 'player' && $session->team_id === $user->team_id);
+            || ($user->role === 'player' && $session->team_id === $user->team_id && $session->coach_id === $user->coach_id);
     }
 
     public function create(User $user): bool
@@ -37,7 +37,11 @@ class TrainingSessionPolicy
 
     public function register(User $user, TrainingSession $session): bool
     {
-        return $user->role === 'player' && $user->is_active && $user->team_id === $session->team_id;
+        return $user->role === 'player'
+            && $user->is_active
+            && $user->coach_id !== null
+            && $user->team_id === $session->team_id
+            && $session->coach_id === $user->coach_id;
     }
 
     public function updateStatus(User $user, TrainingSession $session): bool

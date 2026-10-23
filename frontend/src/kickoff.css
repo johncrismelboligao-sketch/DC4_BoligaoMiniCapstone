@@ -195,6 +195,15 @@ a { color: inherit; }
 .filter-tab.active { color: var(--forest); background: #e9f0e4; }
 .scope-note { color: #929b91; font-size: 10px; }
 .registration-list { display: grid; gap: 8px; }
+.coach-choice-panel, .coach-applications-panel { display: grid; gap: 13px; margin-bottom: 14px; }
+.coach-choice-panel .page-subtitle { margin: -5px 0 0; }
+.coach-choice-list, .coach-application-list { display: grid; gap: 8px; }
+.coach-choice-card, .coach-application-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface, #fff); }
+.coach-choice-card > div, .coach-application-card > div:first-child { display: grid; gap: 5px; min-width: 0; }
+.coach-choice-card strong, .coach-application-card strong { color: var(--text, #354238); font-size: 12px; }
+.coach-choice-card small, .coach-application-card small { color: var(--muted, #879187); font-size: 10px; }
+.coach-application-actions { display: flex; gap: 6px; }
+.compact-button { min-height: 31px; white-space: nowrap; }
 .registration-row { display: grid; grid-template-columns: minmax(150px, .9fr) minmax(180px, 1.2fr) minmax(90px, .55fr) auto; align-items: center; gap: 15px; padding: 13px 15px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
 .registration-person { display: flex; align-items: center; gap: 9px; min-width: 0; }
 .registration-avatar { flex: 0 0 auto; width: 31px; height: 31px; font-size: 11px; }
@@ -202,7 +211,9 @@ a { color: inherit; }
 .registration-person strong, .registration-session strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #354238; font-size: 11px; }
 .registration-person > div > span, .registration-session > span { display: flex; align-items: center; gap: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #879187; font-size: 9px; }
 .registration-session > span svg { flex: 0 0 auto; color: #849486; }
+.registration-session > .requested-drills { display: block; white-space: normal; line-height: 1.4; }
 .registration-state { display: grid; justify-items: start; gap: 5px; }
+.registration-accepted { color: var(--green-700, #176b45); font-size: 12px; font-weight: 650; }
 .attendance-state { color: #879187; font-size: 9px; }
 .registration-actions { display: flex; justify-content: flex-end; align-items: center; gap: 5px; }
 .icon-action { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid transparent; border-radius: 5px; cursor: pointer; }
@@ -643,6 +654,9 @@ a { color: inherit; }
 .page-subtitle, .scope-note, .list-summary { color: #91aa96; }
 .surface-panel, .stat-card, .session-row, .registration-toolbar, .registration-row,
 .club-table-wrap, .filter-bar, .date-stamp { background: rgba(8,30,18,.94); border-color: #245133; border-radius: 10px; }
+.coach-choice-card, .coach-application-card { background: #0c2416; border-color: #245133; }
+.coach-choice-card strong, .coach-application-card strong { color: #ecf3e8; }
+.coach-choice-card small, .coach-application-card small { color: #91aa96; }
 .surface-panel, .stat-card { box-shadow: 0 0 0 1px rgba(100,180,55,.035); }
 .session-row:hover { border-color: #65a843; }
 .stat-number { color: #f0f4e8; font-family: var(--display); }

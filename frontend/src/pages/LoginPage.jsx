@@ -56,7 +56,7 @@ export function LoginPage() {
           </form>
 
         </div>
-        <div className="login-meta">Manila · Community football</div>
+        <div className="login-meta">Manila Â· Community football</div>
       </section>
     </main>
   )

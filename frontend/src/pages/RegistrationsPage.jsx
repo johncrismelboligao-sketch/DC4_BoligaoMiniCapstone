@@ -14,6 +14,10 @@ export function RegistrationsPage() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [refresh, setRefresh] = useState(0)
+  const [coaches, setCoaches] = useState([])
+  const [coachApplications, setCoachApplications] = useState([])
+  const [coachApplicationsLoading, setCoachApplicationsLoading] = useState(true)
+  const [applyingCoachId, setApplyingCoachId] = useState(null)
 
   const canReview = user?.role === 'admin' || user?.role === 'coach'
 
@@ -28,8 +32,53 @@ export function RegistrationsPage() {
       })
       .catch(() => { if (active) setError('Registrations could not be loaded.') })
       .finally(() => { if (active) setLoading(false) })
+
+    if (user?.role === 'player' || canReview) {
+      setCoachApplicationsLoading(true)
+      api.get('/coach-applications')
+        .then(({ data }) => { if (active) setCoachApplications(data.data || []) })
+        .catch(() => { if (active) setError('Coach applications could not be loaded.') })
+        .finally(() => { if (active) setCoachApplicationsLoading(false) })
+    }
+
+    if (user?.role === 'player') {
+      api.get('/coaches')
+        .then(({ data }) => { if (active) setCoaches(data || []) })
+        .catch(() => { if (active) setError('Coach list could not be loaded.') })
+    }
     return () => { active = false }
-  }, [status, page, refresh])
+  }, [status, page, refresh, user?.role])
+
+  async function applyToCoach(coach) {
+    setApplyingCoachId(coach.id)
+    try {
+      await api.post('/coach-applications', { coach_id: coach.id })
+      setNotice(`Application sent to Coach ${coach.name}.`)
+      setError('')
+      setRefresh((value) => value + 1)
+      window.setTimeout(() => setNotice(''), 4000)
+    } catch (requestError) {
+      const firstError = Object.values(requestError.response?.data?.errors || {})[0]?.[0]
+      setError(firstError || requestError.response?.data?.message || 'Unable to apply to this coach.')
+    } finally {
+      setApplyingCoachId(null)
+    }
+  }
+
+  async function decideCoachApplication(application, nextStatus) {
+    try {
+      await api.patch(`/coach-applications/${application.id}`, { status: nextStatus })
+      setNotice(nextStatus === 'approved'
+        ? `${application.player?.name} is now assigned to you.`
+        : `Application from ${application.player?.name} declined.`)
+      setError('')
+      setRefresh((value) => value + 1)
+      window.setTimeout(() => setNotice(''), 4000)
+    } catch (requestError) {
+      const firstError = Object.values(requestError.response?.data?.errors || {})[0]?.[0]
+      setError(firstError || requestError.response?.data?.message || 'Unable to update this coach application.')
+    }
+  }
 
   async function updateRegistration(registration, update, message) {
     try {
@@ -69,15 +118,39 @@ export function RegistrationsPage() {
     {notice && <div className="success-banner" role="status"><Check size={15} />{notice}</div>}
     {error && <ErrorBanner onRetry={() => { setLoading(true); setRefresh((value) => value + 1) }}>{error}</ErrorBanner>}
 
+    {user?.role === 'player' && <CoachChoiceSection application={coachApplications[0]} coaches={coaches} loading={coachApplicationsLoading} applyingCoachId={applyingCoachId} onApply={applyToCoach} />}
+
+    {canReview && <CoachApplicationsSection applications={coachApplications.filter((application) => application.status === 'pending')} loading={coachApplicationsLoading} onApprove={(application) => decideCoachApplication(application, 'approved')} onReject={(application) => decideCoachApplication(application, 'rejected')} />}
+
     <div className="registration-toolbar"><div className="filter-tabs" role="group" aria-label="Filter registrations by status">
       {[['', 'All'], ['pending', 'Pending'], ['approved', 'Approved'], ['rejected', 'Rejected']].map(([value, label]) => <button className={status === value ? 'filter-tab active' : 'filter-tab'} key={value || 'all'} onClick={() => changeFilter(value)}>{label}</button>)}
     </div><span className="scope-note">{canReview ? `Showing ${user?.role === 'coach' ? 'your sessions' : 'all club teams'}` : 'Showing your requests'}</span></div>
 
     {loading ? <LoadingState label="Loading registrations..." /> : rows.length ? <div className="registration-list">
       {rows.map((registration) => <RegistrationRow key={registration.id} registration={registration} canReview={canReview} isPlayer={user?.role === 'player'} onApprove={() => updateRegistration(registration, { path: 'status', body: { status: 'approved' } }, 'Registration approved.')} onReject={() => updateRegistration(registration, { path: 'status', body: { status: 'rejected' } }, 'Registration declined.')} onAttendance={(attended) => updateRegistration(registration, { path: 'attendance', body: { attended } }, attended ? 'Attendance marked present.' : 'Attendance marked absent.')} onCancel={() => cancelRegistration(registration)} />)}
-    </div> : <div className="surface-panel"><EmptyState title="No registrations here" detail="Requests will appear here when a player joins a session." /></div>}
+    </div> : <div className="surface-panel"><EmptyState title="No registrations here" detail={canReview ? 'Player requests for your sessions will appear here for review.' : 'Browse Training sessions and request a spot. Your coach will review your request here.'} /></div>}
     <Pagination currentPage={meta.current_page || page} lastPage={meta.last_page || 1} onPageChange={(nextPage) => { setPage(nextPage); setLoading(true) }} />
   </>
+}
+
+function CoachChoiceSection({ application, coaches, loading, applyingCoachId, onApply }) {
+  const assigned = application?.status === 'approved'
+  const pending = application?.status === 'pending'
+  const rejected = application?.status === 'rejected'
+
+  return <section className="surface-panel coach-choice-panel">
+    <div className="panel-heading"><div><div className="eyebrow">Choose your coach</div><h2>Your coaching team</h2></div></div>
+    {assigned ? <div className="success-banner" role="status">You are now under Coach {application.coach?.name}. Your training sessions with this coach will appear here.</div>
+      : pending ? <div className="scope-note">Your application to Coach {application.coach?.name} is waiting for approval. Once accepted, you’ll be under that coach and can access their sessions.</div>
+        : <><p className="page-subtitle">Choose a coach to work with. After the coach accepts, their sessions for your age group will be available to you.</p>{rejected && <p className="field-error">Your last coach application was declined. You can choose another coach.</p>}{loading ? <LoadingState label="Loading coaches..." /> : coaches.length ? <div className="coach-choice-list">{coaches.map((coach) => <article className="coach-choice-card" key={coach.id}><div><strong>Coach {coach.name}</strong><small>{coach.team ? `Team ${coach.team}` : 'Club coach'}</small></div><button className="secondary-button compact-button" disabled={applyingCoachId != null} onClick={() => onApply(coach)}>{applyingCoachId === coach.id ? 'Applying...' : 'Apply to coach'}</button></article>)}</div> : <EmptyState title="No coaches available" detail="Ask a club admin to activate a coach account." />}</>}
+  </section>
+}
+
+function CoachApplicationsSection({ applications, loading, onApprove, onReject }) {
+  return <section className="surface-panel coach-applications-panel">
+    <div className="panel-heading"><div><div className="eyebrow">Coach assignments</div><h2>Coach applications</h2></div><span className="queue-total"><Users size={14} />{applications.length} pending</span></div>
+    {loading ? <LoadingState label="Loading coach applications..." /> : applications.length ? <div className="coach-application-list">{applications.map((application) => <article className="coach-application-card" key={application.id}><div><strong>{application.player?.name}</strong><small>{application.player?.team?.name || 'No team'} · Applying to Coach {application.coach?.name}</small></div><div className="coach-application-actions"><button className="icon-action action-approve" aria-label={`Accept ${application.player?.name}`} title="Accept player" onClick={() => onApprove(application)}><Check size={16} /></button><button className="icon-action action-reject" aria-label={`Decline ${application.player?.name}`} title="Decline player" onClick={() => onReject(application)}><X size={16} /></button></div></article>)}</div> : <p className="scope-note">New player applications will appear here.</p>}
+  </section>
 }
 
 function RegistrationRow({ registration, canReview, isPlayer, onApprove, onReject, onAttendance, onCancel }) {
@@ -85,8 +158,8 @@ function RegistrationRow({ registration, canReview, isPlayer, onApprove, onRejec
   const player = registration.user
   return <article className="registration-row">
     <div className="registration-person"><span className="avatar registration-avatar">{player?.name?.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span><div><strong>{player?.name || 'Player'}</strong><span>{player?.team?.name || 'No team assigned'} · {player?.position || 'Position not set'}</span></div></div>
-    <div className="registration-session"><strong>{session?.title || 'Training session'}</strong><span><CalendarDays size={13} />{session?.session_date} · {session?.start_time?.slice(0, 5)}</span><span><MapPin size={13} />{session?.venue?.name || 'Venue'}</span></div>
-    <div className="registration-state"><StatusBadge status={registration.status} />{registration.status === 'approved' && <span className="attendance-state">{registration.attended === true ? 'Present' : registration.attended === false ? 'Absent' : 'Attendance open'}</span>}</div>
+    <div className="registration-session"><strong>{session?.title || 'Training session'}</strong><span><CalendarDays size={13} />{session?.session_date} · {session?.start_time?.slice(0, 5)}</span><span><MapPin size={13} />{session?.venue?.name || 'Venue'}</span>{registration.requested_drills?.length > 0 && <span className="requested-drills">Requested drills: {registration.requested_drills.map((drill) => drill.name).join(', ')}</span>}</div>
+    <div className="registration-state"><StatusBadge status={registration.status} />{registration.status === 'approved' && <span className="attendance-state">{registration.attended === true ? 'Present' : registration.attended === false ? 'Absent' : 'Attendance open'}</span>}{isPlayer && registration.status === 'approved' && <span className="registration-accepted" role="status">Accepted — you can join this session and view its drill plan.</span>}</div>
     <div className="registration-actions">
       {canReview && registration.status === 'pending' && <><button className="icon-action action-approve" title="Approve registration" aria-label="Approve registration" onClick={onApprove}><Check size={16} /></button><button className="icon-action action-reject" title="Reject registration" aria-label="Reject registration" onClick={onReject}><X size={16} /></button></>}
       {canReview && registration.status === 'approved' && <><button className={`attendance-button ${registration.attended === true ? 'selected' : ''}`} onClick={() => onAttendance(true)}><CheckCheck size={14} />Present</button><button className={`attendance-button ${registration.attended === false ? 'selected' : ''}`} onClick={() => onAttendance(false)}><X size={14} />Absent</button></>}

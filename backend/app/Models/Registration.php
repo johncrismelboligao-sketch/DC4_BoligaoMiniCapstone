@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Registration extends Model
 {
@@ -25,5 +26,10 @@ class Registration extends Model
     public function trainingSession(): BelongsTo
     {
         return $this->belongsTo(TrainingSession::class);
+    }
+
+    public function requestedDrills(): BelongsToMany
+    {
+        return $this->belongsToMany(Drill::class, 'registration_drill_requests')->withTimestamps();
     }
 }

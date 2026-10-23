@@ -31,6 +31,7 @@ class User extends Authenticatable
         'position',
         'date_of_birth',
         'team_id',
+        'coach_id',
         'is_active',
     ];
 
@@ -62,6 +63,21 @@ class User extends Authenticatable
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function coach(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'coach_id');
+    }
+
+    public function players(): HasMany
+    {
+        return $this->hasMany(self::class, 'coach_id');
+    }
+
+    public function coachApplications(): HasMany
+    {
+        return $this->hasMany(CoachApplication::class, 'player_id');
     }
 
     public function coachedSessions(): HasMany
